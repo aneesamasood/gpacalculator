@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPA Calculator</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            border-color: #4CAF50;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        h2 {
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Welcome to the GPA Calculator</h1>
+
+    <form method="post" id="course-form">
+        {% csrf_token %}
+        <label for="id_current_gpa">Current GPA:</label>
+        <input type="number" name="current_gpa" step="0.01" id="id_current_gpa" required>
+        <br>
+        <label for="id_total_credits">Total Credits:</label>
+        <input type="number" name="total_credits" step="0.01" id="id_total_credits" required>
+        <br>
+        <label for="id_num_courses">Number of Courses:</label>
+        <input type="number" name="num_courses" id="id_num_courses" required>
+        <br>
+
+        <div id="formset-container">
+            {{ formset.management_form }}
+            <div class="dynamic-form">
+                <label for="id_percentage_0">Percentage:</label>
+                <input type="number" name="percentage_0" id="id_percentage_0" step="0.01" required>
+                <br>
+            </div>
+        </div>
+
+        <button type="button" id="add-course">Add Course</button>
+        <button type="button" id="calculate-gpa">Calculate GPA</button>
+    </form>
+
+    <h2 id="term-gpa">Term GPA: 0.00</h2>
+    <h2 id="cumulative-gpa">Cumulative GPA: 0.00>
+
+    <script>
+        $(document).ready(function () {
+            $('#add-course').click(function () {
+                var formCount = $('.dynamic-form').length;
+                var newForm = `
+                    <div class="dynamic-form">
+                        <label for="id_percentage_${formCount}">Percentage:</label>
+                        <input type="number" name="percentage_${formCount}" id="id_percentage_${formCount}" step="0.01" required>
+                        <br>
+                    </div>
+                `;
+                $('#formset-container').append(newForm);
+            });
+
+            $('#calculate-gpa').click(function () {
+                console.log('Calculate GPA clicked');
+
+                var currentGPA = parseFloat($('input[name="current_gpa"]').val());
+                var totalCredits = parseFloat($('input[name="total_credits"]').val());
+                var numCourses = parseFloat($('input[name="num_courses"]').val());
+
+                var percentages = $('.dynamic-form input[type="number"]').map(function () {
+                    return parseInt($(this).val()) || 0;
+                }).get();
+
+                console.log('Current GPA:', currentGPA);
+                console.log('Total Credits:', totalCredits);
+                console.log('Number of Courses:', numCourses);
+                console.log('Percentages:', percentages);
+
+                // Convert percentages to GPA based on the provided scale
+                var convertedGPAs = percentages.map(function (percentage) {
+                    if (percentage >= 90) return 4.33;
+                    else if (percentage >= 85) return 4.00;
+                    else if (percentage >= 80) return 3.67;
+                    else if (percentage >= 77) return 3.33;
+                    else if (percentage >= 73) return 3.00;
+                    else if (percentage >= 70) return 2.67;
+                    else if (percentage >= 67) return 2.33;
+                    else if (percentage >= 63) return 2.00;
+                    else if (percentage >= 60) return 1.67;
+                    else if (percentage >= 57) return 1.33;
+                    else if (percentage >= 53) return 1.00;
+                    else if (percentage >= 50) return 0.67;
+                    else return Math.round(percentage / 10) / 10;
+                });
+
+                console.log('Converted GPAs:', convertedGPAs);
+
+                var totalPercentage = convertedGPAs.reduce((a, b) => a + b, 0);
+                var termGPA = totalPercentage / numCourses;
+
+                var cumulativeGPA = (currentGPA * totalCredits + termGPA * numCourses) / (totalCredits + numCourses);
+
+                // Update the content of the spans
+                $('#term-gpa').text('Term GPA: ' + termGPA.toFixed(2));
+                $('#cumulative-gpa').text('Cumulative GPA: ' + cumulativeGPA.toFixed(2));
+
+                console.log('Term GPA:', termGPA.toFixed(2));
+                console.log('Cumulative GPA:', cumulativeGPA.toFixed(2));
+            });
+        });
+    </script>
+</div>
+
+</body>
+</html>
+
