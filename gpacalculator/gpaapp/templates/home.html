@@ -1,0 +1,31 @@
+<!-- gpaapp/templates/home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPA App Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the GPA Calculator</h1>
+    <p>This is the home page of the GPA Calculator app. You can use the app to calculate your GPA based on course percentages.</p>
+    <p>Get started by navigating to the <a href="{% url 'gpaapp:calculate_gpa' %}">Calculate GPA</a> page.</p>
+</body>
+</html>
+
